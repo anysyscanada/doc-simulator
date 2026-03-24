@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日本メディカルツーリズム 費用シミュレーター</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;background:#f9f8f4;color:#2c2c2a;padding:20px;max-width:800px;margin:0 auto}
+h1{font-size:19px;font-weight:700;margin-bottom:4px}
+.sub{font-size:12px;color:#888780;margin-bottom:14px;line-height:1.6}
+h3{font-size:11px;font-weight:700;margin-bottom:8px;color:#888780;text-transform:uppercase;letter-spacing:.05em}
+.sec{margin-bottom:20px}
+.mode-row,.ins-row,.grow{display:flex;gap:8px}
+.mbtn,.ibtn,.gbtn{flex:1;padding:11px;border-radius:10px;border:1.5px solid #d3d1c7;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#888780;transition:all .15s}
+.mbtn.on{border-color:#378ADD;background:#E6F1FB;color:#0C447C}
+.gbtn.on{border-color:#1D9E75;background:#E1F5EE;color:#085041}
+.ibtn.on-self{border-color:#D85A30;background:#FAECE7;color:#712B13}
+.ibtn.on-kokuho{border-color:#1D9E75;background:#E1F5EE;color:#085041}
+.ins-explain{font-size:11px;border-radius:8px;padding:10px 14px;margin-top:8px;line-height:1.7;border:1px solid}
+.ins-explain.self{background:#FAECE7;border-color:#F0997B;color:#712B13}
+.ins-explain.kokuho{background:#E1F5EE;border-color:#5DCAA5;color:#085041}
+.cgrid,.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ogrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:520px){.cgrid,.tgrid,.ogrid{grid-template-columns:1fr}}
+.ccard,.tcard{border:1.5px solid #d3d1c7;border-radius:12px;padding:12px 14px;cursor:pointer;background:#fff;transition:all .15s}
+.ccard:hover{border-color:#B5D4F4}
+.ccard.on{border-color:#378ADD;background:#E6F1FB}
+.tcard:hover{border-color:#F5C4B3}
+.tcard.on{border-color:#D85A30;background:#FAECE7}
+.cname{font-size:13px;font-weight:700;margin-bottom:4px}
+.cdesc{font-size:11px;color:#888780;line-height:1.5;margin-bottom:6px}
+.pjpy{font-size:13px;font-weight:700;color:#0C447C}
+.pcad{font-size:11px;color:#5F5E5A;margin-top:2px}
+.pusd{font-size:11px;color:#3B6D11;margin-top:1px}
+.price-note{font-size:10px;color:#b4b2a9;margin-top:3px;line-height:1.5}
+.ins-badge{display:inline-block;font-size:10px;background:#E1F5EE;color:#085041;border:1px solid #5DCAA5;border-radius:4px;padding:1px 5px;margin-top:3px;font-weight:600}
+.noins-badge{display:inline-block;font-size:10px;background:#FAECE7;color:#993C1D;border:1px solid #F0997B;border-radius:4px;padding:1px 5px;margin-top:3px;font-weight:600}
+.ttag{display:inline-block;font-size:10px;border-radius:4px;padding:2px 7px;margin-bottom:4px;font-weight:600}
+.tag-radio{background:#EEEDFE;color:#3C3489}
+.tag-immuno{background:#E1F5EE;color:#085041}
+.tag-regen{background:#FAEEDA;color:#633806}
+.tag-surgery{background:#FCEBEB;color:#A32D2D}
+.tag-exam{background:#F1EFE8;color:#444441}
+.warn-badge{display:inline-block;font-size:10px;background:#FAEEDA;color:#BA7517;border-radius:3px;padding:1px 5px;margin-left:3px;font-weight:600}
+.oitem{display:flex;align-items:center;gap:10px;border:1px solid #d3d1c7;border-radius:10px;padding:9px 12px;cursor:pointer;background:#fff;transition:all .15s}
+.oitem:hover{border-color:#B5D4F4}
+.oitem.on{border-color:#534AB7;background:#EEEDFE}
+.olbl{flex:1;font-size:12px;line-height:1.5}
+.oprc{font-size:11px;font-weight:700;color:#3C3489;white-space:nowrap;text-align:right;line-height:1.7}
+.bf{display:inline-block;font-size:10px;background:#FBEAF0;color:#993556;border:1px solid #ED93B1;border-radius:4px;padding:1px 5px;margin-left:4px}
+.prow{display:flex;align-items:center;gap:14px}
+.pbtn{width:38px;height:38px;border-radius:50%;border:1.5px solid #d3d1c7;background:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pnum{font-size:26px;font-weight:700;min-width:32px;text-align:center}
+.rrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.rlbl{font-size:12px;color:#5F5E5A;min-width:185px}
+.rval{font-size:13px;font-weight:700;min-width:44px;text-align:right}
+input[type=range]{flex:1;accent-color:#1D9E75}
+.dvd{height:1px;background:#d3d1c7;margin:14px 0}
+.rbox{border-radius:14px;border:1.5px solid #d3d1c7;padding:16px 18px;background:#fff}
+.rr{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1efe8;font-size:13px}
+.rr .l{color:#888780;flex:1}
+.rr .v{font-weight:700;text-align:right;line-height:1.7}
+.rr-ins{background:#EAF3DE;border-radius:6px;padding:8px 10px;margin:4px 0;font-size:12px;display:flex;justify-content:space-between;align-items:flex-start}
+.rr-ins .l{color:#27500A;flex:1}
+.rr-ins .v{color:#27500A;font-weight:700;text-align:right;line-height:1.7}
+.rtot{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;padding-top:12px;border-top:2.5px solid #1D9E75}
+.rtot .l{font-size:14px;font-weight:700}
+.rtot .v{text-align:right;line-height:1.8}
+.rtot .v .main{font-size:22px;font-weight:800;color:#085041;display:block}
+.rtot .v .s2{font-size:12px;color:#3B6D11;display:block}
+.rpro{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px dashed #d3d1c7;font-size:12px}
+.rpro .v{font-size:13px;font-weight:700;color:#534AB7;text-align:right;line-height:1.7}
+.nt{font-size:11px;color:#888780;margin-top:10px;line-height:1.7}
+.nosel{text-align:center;padding:28px;color:#b4b2a9;font-size:13px}
+.caution{font-size:11px;background:#FAEEDA;border:1px solid #BA7517;border-radius:8px;padding:10px 14px;color:#633806;margin-top:12px;line-height:1.7}
+.refund-info{font-size:11px;background:#E1F5EE;border:1px solid #5DCAA5;border-radius:8px;padding:10px 14px;margin-top:10px;color:#085041;line-height:1.7}
+.foot{font-size:11px;color:#b4b2a9;margin-top:18px;line-height:1.9}
+.legend{font-size:11px;color:#888780;margin-bottom:10px;line-height:1.8}
+</style>
+</head>
+<body>
+
+<h1>日本メディカルツーリズム 費用シミュレーター</h1>
+<p class="sub">カナダ（バンクーバー）&rarr; 日本 ／ 二友株式会社 &times; カナダチーム<br>
+金額：¥円 / CAD / USD 併記　※ 2024〜2025年の外国人自費価格を参考にした目安</p>
+
+<!-- 保険切替 -->
+<div class="sec">
+  <h3>保険の適用状況</h3>
+  <div class="ins-row">
+    <button class="ibtn on-self" id="ins-self" onclick="setIns('self')">全額自費（保険なし）</button>
+    <button class="ibtn" id="ins-kokuho" onclick="setIns('kokuho')">国民健康保険あり（3割負担）</button>
+  </div>
+  <div class="ins-explain self" id="ins-explain">
+    <strong>全額自費（10割負担）：</strong>カナダ在住で日本の国保に加入していない方はこちら。窓口で全額を支払います。返金はありません。カナダからの患者さんの大多数がこのケースです。
+  </div>
+</div>
+
+<!-- モード -->
+<div class="sec">
+  <h3>モードを選択</h3>
+  <div class="mode-row">
+    <button class="mbtn on" id="mode-dock" onclick="setMode('dock')">検査・人間ドック</button>
+    <button class="mbtn" id="mode-treat" onclick="setMode('treat')">治療（放射線・再生医療等）</button>
+  </div>
+</div>
+
+<!-- 性別 -->
+<div class="sec" id="gender-sec">
+  <h3>性別</h3>
+  <div class="grow">
+    <button class="gbtn on" id="bm" onclick="sg('m')">男性</button>
+    <button class="gbtn" id="bf" onclick="sg('f')">女性</button>
+    <button class="gbtn" id="bb" onclick="sg('b')">両性（夫婦・カップル）</button>
+  </div>
+</div>
+
+<!-- コース -->
+<div class="sec" id="dock-sec">
+  <h3>コースを選択</h3>
+  <div class="cgrid" id="cgrid"></div>
+</div>
+
+<!-- オプション -->
+<div class="sec" id="opt-sec">
+  <h3>検査オプション追加</h3>
+  <div class="ogrid" id="ogrid"></div>
+</div>
+
+<!-- 治療メニュー -->
+<div class="sec" id="treat-sec" style="display:none">
+  <h3>治療メニューを選択（複数選択可）</h3>
+  <div class="legend">
+    <span class="ttag tag-radio">放射線</span>&nbsp;
+    <span class="ttag tag-surgery">外科・化学</span>&nbsp;
+    <span class="ttag tag-immuno">免疫・細胞</span>&nbsp;
+    <span class="ttag tag-regen">再生医療</span>&nbsp;
+    <span class="ttag tag-exam">検査・診断</span>&nbsp;
+    <span class="warn-badge">要確認</span> = Health Canada未承認の可能性あり&nbsp;&nbsp;
+    <span class="ins-badge">国保適用</span> / <span class="noins-badge">保険外</span>
+  </div>
+  <div class="tgrid" id="tgrid"></div>
+</div>
+
+<!-- 人数 -->
+<div class="sec">
+  <h3>人数</h3>
+  <div class="prow">
+    <button class="pbtn" onclick="sp(-1)">&#8722;</button>
+    <span class="pnum" id="pnum">1</span>
+    <button class="pbtn" onclick="sp(1)">+</button>
+    <span style="font-size:13px;color:#888780;margin-left:6px">名</span>
+  </div>
+</div>
+
+<!-- 手数料 -->
+<div class="sec">
+  <h3>手数料率の設定</h3>
+  <div class="rrow">
+    <span class="rlbl">小野さん側（医療費ベース）</span>
+    <input type="range" min="10" max="25" value="15" id="or" oninput="calc()">
+    <span class="rval" id="ov">15%</span>
+  </div>
+  <div class="rrow">
+    <span class="rlbl">カナダチーム（医療費ベース）</span>
+    <input type="range" min="10" max="25" value="15" id="cr" oninput="calc()">
+    <span class="rval" id="cv">15%</span>
+  </div>
+  <div class="rrow">
+    <span class="rlbl">旅行手配利益（旅行費ベース）</span>
+    <input type="range" min="5" max="20" value="10" id="tr" oninput="calc()">
+    <span class="rval" id="tv">10%</span>
+  </div>
+</div>
+
+<!-- 旅行費 -->
+<div class="sec">
+  <h3>旅行費概算（CAD・1名あたり）</h3>
+  <div class="rrow">
+    <span class="rlbl">フライト＋ホテル</span>
+    <input type="range" min="1500" max="10000" step="100" value="2500" id="tc" oninput="calc()">
+    <span class="rval" id="tcv">2,500</span>
+  </div>
+</div>
+
+<div class="dvd"></div>
+
+<!-- 結果 -->
+<div class="rbox">
+  <div class="nosel" id="nosel">上のメニューを選択すると金額が表示されます</div>
+  <div id="rdet" style="display:none">
+    <div class="rr"><span class="l">医療費（合計・10割）</span><span class="v" id="rm"></span></div>
+    <div class="rr-ins" id="row-cover" style="display:none">
+      <span class="l">国保適用分（保険診療）</span><span class="v" id="r-cover"></span>
+    </div>
+    <div class="rr-ins" id="row-nocover" style="display:none">
+      <span class="l">保険外診療分（自費）</span><span class="v" id="r-nocover"></span>
+    </div>
+    <div class="rr" id="row-share" style="display:none">
+      <span class="l"><strong>窓口実払い（3割＋保険外分）</strong></span><span class="v" id="r-share"></span>
+    </div>
+    <div class="rr"><span class="l" id="r-opt-lbl">オプション追加</span><span class="v" id="ro"></span></div>
+    <div class="rr"><span class="l">小野さん手数料</span><span class="v" id="rono"></span></div>
+    <div class="rr"><span class="l">カナダチーム手数料</span><span class="v" id="rca"></span></div>
+    <div class="rr"><span class="l">旅行費（フライト＋ホテル）</span><span class="v" id="rtv"></span></div>
+    <div class="rr"><span class="l">予備費（通訳・現地移動等）</span><span class="v" id="rres"></span></div>
+    <div class="rtot">
+      <span class="l">エスクロー合計（1名）</span>
+      <span class="v" id="rt1"></span>
+    </div>
+    <div class="rtot" id="rtmr" style="display:none">
+      <span class="l" id="rtml"></span>
+      <span class="v" id="rtm"></span>
+    </div>
+    <div class="refund-info" id="refund-info" style="display:none">
+      <strong>国保還付について（全員分）</strong><br>
+      <span id="r-refund-text"></span><br>
+      窓口で一旦10割を支払い後、患者さんが市区町村の国保窓口に「療養費支給申請」を提出すると数ヶ月後に還付されます。高額療養費制度の適用で月の自己負担上限（約8万〜15万円）超過分も還付対象です。<br>
+      <span style="color:#0F6E56">→ エスクローは窓口払い分（実払い額）を基準に設定します。還付金は患者さんに直接戻ります。</span>
+    </div>
+    <div class="dvd"></div>
+    <div class="rpro"><span class="l">カナダチームの収益（旅行利益込み・全員分）</span><span class="v" id="rcp"></span></div>
+    <div class="rpro"><span class="l">小野さんへの支払い（全員分）</span><span class="v" id="rop"></span></div>
+    <p class="nt">
+      ※ 換算レート（2026年3月）：CAD 1 = ¥116 ／ USD 1 = ¥159<br>
+      ※ 両性選択時は1名あたりの金額 &times; 2名で計算。<br>
+      ※ 手数料は「窓口実払い額（エスクロー基準額）」に対して計算しています。
+    </p>
+    <div class="caution" id="treat-warn" style="display:none">
+      <strong>Health Canada について：</strong>選択した治療の中に、Health Canada未承認のものが含まれています。カナダ国内での継続治療や保険請求ができない場合があります。日本のクリニックによる英訳医療サマリーの取得を強くお勧めします。
+    </div>
+  </div>
+</div>
+
+<p class="foot">
+  ※ 治療費はクリニック・病院・症例によって大きく変動します。必ず事前に正式な見積もりを取得してください。<br>
+  ※ 女性向けオプションは女性・両性選択時のみ表示されます。<br>
+  ※ このファイルはオフラインでも動作します。
+</p>
+
+<script>
+var RCAD = 0.00863;
+var RUSD = 0.00629;
+var g = 'm', sc = null, so = [], st = [], px = 1, mode = 'dock', ins = 'self';
+
+// 国保適用かどうかのフラグ（true=保険適用・3割負担、false=自由診療・全額自費）
+// 人間ドック・再生医療・免疫細胞療法（先進医療外）は保険対象外
+var COVERED = {
+  gamma:true, cyber:true, imrt:true, stereo:true,
+  surgery:true, chemo:true, immuno:true, molec:true,
+  cart:true, genome:true,
+  proton:false, dendri:false, nk:false, stem:false, exo:false,
+  basic:false, full:false, pet:false, petdock:false, brain:false, womens:false,
+  mammo:false, echo:false, gyneco:false, colon:false, gastro:false,
+  bone:false, allergy:false, brain2:false
+};
+
+var CS = [
+  {id:'basic',   s:'all', j:50000,  n:'基本人間ドック（半日）',    d:'血液・尿・心電図・胸部X線・胃カメラ・腹部エコー'},
+  {id:'full',    s:'all', j:150000, n:'総合人間ドック（1泊2日）',  d:'基本＋肺機能・眼底・骨密度・腫瘍マーカー・詳細エコー'},
+  {id:'pet',     s:'all', j:110000, n:'PET-CTスキャン',            d:'全身がんスクリーニング。放射線使用・半日で完了'},
+  {id:'petdock', s:'all', j:250000, n:'総合ドック＋PET-CT',        d:'最も充実したコース。1泊2日ドック＋PET-CT全身検査'},
+  {id:'brain',   s:'all', j:80000,  n:'脳ドック',                  d:'MRI・MRA・頸動脈エコー・認知機能検査'},
+  {id:'womens',  s:'f',   j:80000,  n:'女性ドック（半日）',         d:'基本検査＋婦人科・乳房エコー・子宮頸がん検診'}
+];
+
+var OS = [
+  {id:'mammo',   s:'f',   j:15000,  n:'マンモグラフィー',      d:'乳がん精密検査（40歳以上推奨）'},
+  {id:'echo',    s:'f',   j:12000,  n:'乳房エコー（超音波）',   d:'若年層・高濃度乳腺に有効'},
+  {id:'gyneco',  s:'f',   j:20000,  n:'婦人科検診',            d:'子宮頸がん・体がん・卵巣エコー'},
+  {id:'colon',   s:'all', j:35000,  n:'大腸内視鏡',           d:'大腸がんスクリーニング'},
+  {id:'gastro',  s:'all', j:25000,  n:'胃カメラ（鎮静あり）',  d:'苦痛の少ない内視鏡検査'},
+  {id:'bone',    s:'all', j:8000,   n:'骨密度検査',           d:'骨粗しょう症リスク確認'},
+  {id:'allergy', s:'all', j:15000,  n:'アレルギー検査',        d:'主要アレルゲン36項目'},
+  {id:'brain2',  s:'all', j:55000,  n:'脳ドック追加',         d:'MRI＋MRA（コースに未含む場合）'}
+];
+
+var TS = [
+  {id:'gamma',  tag:'tag-radio',   warn:false, j:700000,   n:'ガンマナイフ',              d:'脳腫瘍への定位放射線治療。1セッション・外来対応。',    note:'目安：¥600,000〜800,000'},
+  {id:'cyber',  tag:'tag-radio',   warn:false, j:1200000,  n:'サイバーナイフ',             d:'全身対応ロボット定位放射線治療。1〜5セッション。',     note:'目安：¥1,000,000〜1,500,000'},
+  {id:'proton', tag:'tag-radio',   warn:false, j:2800000,  n:'陽子線治療',                d:'先進医療。正常組織へのダメージが少ない。全国約25施設。', note:'目安：¥2,500,000〜3,200,000'},
+  {id:'imrt',   tag:'tag-radio',   warn:false, j:800000,   n:'強度変調放射線治療（IMRT）', d:'複雑な形状の腫瘍に対応した精密放射線治療。',          note:'目安：¥700,000〜1,000,000'},
+  {id:'stereo', tag:'tag-surgery', warn:false, j:700000,   n:'定位脳手術',                d:'ガンマナイフ等を用いた非侵襲的脳手術。開頭不要。',    note:'目安：¥600,000〜800,000'},
+  {id:'surgery',tag:'tag-surgery', warn:false, j:1500000,  n:'外科手術（オペ）',           d:'がん・腫瘍の外科的切除。部位・複雑度により変動。',     note:'目安：¥800,000〜3,000,000'},
+  {id:'chemo',  tag:'tag-surgery', warn:false, j:400000,   n:'化学療法（抗がん剤）',        d:'がん種・ステージにより内容が異なる。入院または外来。', note:'目安：¥300,000〜600,000 / サイクル'},
+  {id:'immuno', tag:'tag-immuno',  warn:true,  j:800000,   n:'免疫療法（チェックポイント阻害剤）', d:'オプジーボ・キイトルーダ等。定期点滴投与。', note:'目安：¥600,000〜1,000,000 / サイクル'},
+  {id:'molec',  tag:'tag-immuno',  warn:false, j:300000,   n:'分子標的治療',              d:'がん細胞の特定分子を狙い撃ち。ゲノム検査で適応判断。', note:'目安：¥200,000〜500,000 / 月'},
+  {id:'cart',   tag:'tag-immuno',  warn:true,  j:32600000, n:'CAR-T細胞治療',             d:'患者T細胞を改変してがんを攻撃。血液がんに有効。',     note:'公定価格：¥32,600,000（国保で3割≈¥9,780,000）'},
+  {id:'dendri', tag:'tag-immuno',  warn:true,  j:600000,   n:'樹状細胞ワクチン療法',       d:'患者自身の免疫細胞でがんを攻撃。副作用少・併用可。', note:'目安：¥500,000〜800,000 / コース'},
+  {id:'nk',     tag:'tag-immuno',  warn:true,  j:1500000,  n:'NK細胞療法',                d:'ナチュラルキラー細胞療法。細胞培養に2〜3週間要する。', note:'目安：¥1,000,000〜5,000,000'},
+  {id:'genome', tag:'tag-exam',    warn:false, j:600000,   n:'がんゲノム医療',             d:'がん遺伝子パネル検査で個々の最適治療を選定。',        note:'目安：¥500,000〜700,000'},
+  {id:'stem',   tag:'tag-regen',   warn:true,  j:1500000,  n:'再生医療（幹細胞治療）',     d:'自家幹細胞による組織再生・疾患治療。厚労省届出機関のみ。', note:'目安：¥1,000,000〜7,500,000'},
+  {id:'exo',    tag:'tag-regen',   warn:true,  j:500000,   n:'再生医療（エクソソーム）',   d:'細胞外小胞を用いた次世代再生治療。抗炎症・組織修復。',  note:'目安：¥300,000〜800,000'}
+];
+
+var TAGS = {
+  'tag-radio':'放射線','tag-immuno':'免疫・細胞',
+  'tag-regen':'再生医療','tag-surgery':'外科・化学','tag-exam':'検査・診断'
+};
+
+function gc(id){for(var i=0;i<CS.length;i++){if(CS[i].id===id)return CS[i];}return null;}
+function go(id){for(var i=0;i<OS.length;i++){if(OS[i].id===id)return OS[i];}return null;}
+function gt(id){for(var i=0;i<TS.length;i++){if(TS[i].id===id)return TS[i];}return null;}
+function has(arr,id){return arr.indexOf(id)>=0;}
+function jpy(n){return '\u00a5'+n.toLocaleString();}
+function cad(n){return 'CAD '+Math.round(n*RCAD).toLocaleString();}
+function usd(n){return 'USD '+Math.round(n*RUSD).toLocaleString();}
+function triLine(j){ return jpy(j)+'<br>'+cad(j)+'<br><span style="color:#3B6D11">'+usd(j)+'</span>'; }
+function cadUsd(cadVal){
+  return 'CAD '+Math.round(cadVal).toLocaleString()+'<br><span style="color:#3B6D11">USD '+Math.round(cadVal/RCAD*RUSD).toLocaleString()+'</span>';
+}
+function cadUsdInline(cadVal){
+  return 'CAD '+Math.round(cadVal).toLocaleString()+' / USD '+Math.round(cadVal/RCAD*RUSD).toLocaleString();
+}
+function bigCAD(cadVal){
+  return '<span class="main">CAD '+Math.round(cadVal).toLocaleString()+'</span>'
+        +'<span class="s2">USD '+Math.round(cadVal/RCAD*RUSD).toLocaleString()+'</span>';
+}
+
+function setIns(v){
+  ins=v;
+  document.getElementById('ins-self').className   ='ibtn'+(v==='self'   ?' on-self':'');
+  document.getElementById('ins-kokuho').className ='ibtn'+(v==='kokuho' ?' on-kokuho':'');
+  var ex=document.getElementById('ins-explain');
+  if(v==='self'){
+    ex.className='ins-explain self';
+    ex.innerHTML='<strong>全額自費（10割負担）：</strong>カナダ在住で日本の国保に加入していない方はこちら。窓口で全額を支払います。返金はありません。カナダからの患者さんの大多数がこのケースです。';
+  } else {
+    ex.className='ins-explain kokuho';
+    ex.innerHTML='<strong>国民健康保険あり（3割負担）：</strong>日本に住民登録があり国保に正式加入している方が対象。窓口では一旦10割を支払い、後日7割が還付されます（療養費払い）。ただし人間ドック・再生医療・免疫細胞療法等の自由診療には適用されません。';
+  }
+  calc();
+}
+
+function setMode(m){
+  mode=m;
+  document.getElementById('mode-dock').className='mbtn'+(m==='dock'?' on':'');
+  document.getElementById('mode-treat').className='mbtn'+(m==='treat'?' on':'');
+  document.getElementById('gender-sec').style.display=m==='dock'?'':'none';
+  document.getElementById('dock-sec').style.display=m==='dock'?'':'none';
+  document.getElementById('opt-sec').style.display=m==='dock'?'':'none';
+  document.getElementById('treat-sec').style.display=m==='treat'?'':'none';
+  sc=null;so=[];st=[];drawC();drawO();drawT();calc();
+}
+
+function sg(v){
+  g=v;
+  document.getElementById('bm').className='gbtn'+(v==='m'?' on':'');
+  document.getElementById('bf').className='gbtn'+(v==='f'?' on':'');
+  document.getElementById('bb').className='gbtn'+(v==='b'?' on':'');
+  if(sc){var c=gc(sc);if(c&&c.s==='f'&&v==='m')sc=null;}
+  var no=[];
+  for(var i=0;i<so.length;i++){var o=go(so[i]);if(o&&(o.s==='all'||v!=='m'))no.push(so[i]);}
+  so=no;drawC();drawO();calc();
+}
+
+function drawC(){
+  var h='';
+  for(var i=0;i<CS.length;i++){
+    var c=CS[i];
+    if(c.s==='f'&&g==='m')continue;
+    h+='<div class="ccard'+(sc===c.id?' on':'')+'" onclick="sel(\''+c.id+'\')">';
+    h+='<div class="cname">'+c.n+'</div>';
+    h+='<div class="cdesc">'+c.d+'</div>';
+    h+='<div class="pjpy">'+jpy(c.j)+'</div>';
+    h+='<div class="pcad">\u2248 '+cad(c.j)+'</div>';
+    h+='<div class="pusd">\u2248 '+usd(c.j)+'</div>';
+    h+='<div class="noins-badge">\u81ea\u7531\u8a3a\u7642\uff08\u4fdd\u967a\u5916\uff09</div>';
+    h+='</div>';
+  }
+  document.getElementById('cgrid').innerHTML=h;
+}
+
+function drawO(){
+  var h='';
+  for(var i=0;i<OS.length;i++){
+    var o=OS[i];
+    if(o.s==='f'&&g==='m')continue;
+    var bd=o.s==='f'?'<span class="bf">\u5973\u6027</span>':'';
+    h+='<div class="oitem'+(has(so,o.id)?' on':'')+'" onclick="tog(\''+o.id+'\')">';
+    h+='<span class="olbl">'+o.n+bd+'<br><span style="font-size:10px;color:#b4b2a9">'+o.d+'</span></span>';
+    h+='<span class="oprc">+'+jpy(o.j)+'<br>+'+cad(o.j)+'<br><span style="color:#3B6D11">+'+usd(o.j)+'</span></span>';
+    h+='</div>';
+  }
+  document.getElementById('ogrid').innerHTML=h;
+}
+
+function drawT(){
+  var h='';
+  for(var i=0;i<TS.length;i++){
+    var t=TS[i];
+    var wb=t.warn?'<span class="warn-badge">\u8981\u78ba\u8a8d</span>':'';
+    var ib=COVERED[t.id]
+      ?'<span class="ins-badge">\u56fd\u4fdd\u9069\u7528</span>'
+      :'<span class="noins-badge">\u81ea\u7531\u8a3a\u7642</span>';
+    h+='<div class="tcard'+(has(st,t.id)?' on':'')+'" onclick="togT(\''+t.id+'\')">';
+    h+='<div><span class="ttag '+t.tag+'">'+TAGS[t.tag]+'</span>'+wb+'</div>';
+    h+='<div style="margin-bottom:4px">'+ib+'</div>';
+    h+='<div class="cname">'+t.n+'</div>';
+    h+='<div class="cdesc">'+t.d+'</div>';
+    h+='<div class="pjpy">'+jpy(t.j)+'</div>';
+    h+='<div class="pcad">\u2248 '+cad(t.j)+'</div>';
+    h+='<div class="pusd">\u2248 '+usd(t.j)+'</div>';
+    h+='<div class="price-note">'+t.note+'</div>';
+    h+='</div>';
+  }
+  document.getElementById('tgrid').innerHTML=h;
+}
+
+function sel(id){sc=(sc===id)?null:id;drawC();calc();}
+function tog(id){var i=so.indexOf(id);if(i>=0)so.splice(i,1);else so.push(id);drawO();calc();}
+function togT(id){var i=st.indexOf(id);if(i>=0)st.splice(i,1);else st.push(id);drawT();calc();}
+function sp(d){px=Math.max(1,Math.min(10,px+d));document.getElementById('pnum').textContent=px;calc();}
+
+function calc(){
+  var or2=parseInt(document.getElementById('or').value)/100;
+  var cr2=parseInt(document.getElementById('cr').value)/100;
+  var tr2=parseInt(document.getElementById('tr').value)/100;
+  var tc2=parseInt(document.getElementById('tc').value);
+  document.getElementById('ov').textContent=Math.round(or2*100)+'%';
+  document.getElementById('cv').textContent=Math.round(cr2*100)+'%';
+  document.getElementById('tv').textContent=Math.round(tr2*100)+'%';
+  document.getElementById('tcv').textContent=tc2.toLocaleString();
+
+  var hasSelection=false, totalMedJ=0, covJ=0, uncovJ=0, optMedJ=0;
+
+  if(mode==='dock'){
+    if(sc){
+      hasSelection=true;
+      var c=gc(sc); totalMedJ=c.j; uncovJ=c.j;
+      for(var i=0;i<so.length;i++){var o=go(so[i]);if(o){optMedJ+=o.j;uncovJ+=o.j;}}
+      totalMedJ+=optMedJ;
+    }
+  } else {
+    if(st.length>0){
+      hasSelection=true;
+      for(var i=0;i<st.length;i++){
+        var t=gt(st[i]);
+        if(t){
+          totalMedJ+=t.j;
+          if(COVERED[t.id]) covJ+=t.j;
+          else uncovJ+=t.j;
+        }
+      }
+    }
+  }
+
+  if(!hasSelection){
+    document.getElementById('nosel').style.display='block';
+    document.getElementById('rdet').style.display='none';
+    return;
+  }
+  document.getElementById('nosel').style.display='none';
+  document.getElementById('rdet').style.display='block';
+
+  var mt=(g==='b'&&mode==='dock')?2:1;
+
+  // 患者の窓口実払い額（エスクロー基準）
+  var patShareJ, refundJ;
+  if(ins==='kokuho' && covJ>0){
+    patShareJ = Math.round(covJ*0.3) + uncovJ;
+    refundJ   = Math.round(covJ*0.7);
+  } else {
+    patShareJ = totalMedJ;
+    refundJ   = 0;
+  }
+
+  var mc=patShareJ*RCAD;
+  var of2=mc*or2, cf=mc*cr2, tp=tc2*tr2;
+  var tot=(mc+of2+cf+tc2+200)*mt;
+
+  // 医療費表示（10割全額）
+  document.getElementById('rm').innerHTML=triLine(totalMedJ);
+
+  // 国保行の表示
+  var rowCov   = document.getElementById('row-cover');
+  var rowNoCov = document.getElementById('row-nocover');
+  var rowShare = document.getElementById('row-share');
+  var refInfo  = document.getElementById('refund-info');
+  var rRefText = document.getElementById('r-refund-text');
+
+  if(ins==='kokuho'){
+    if(covJ>0){
+      rowCov.style.display='flex';
+      document.getElementById('r-cover').innerHTML=
+        jpy(covJ)+'<br><span style="font-size:10px">\u2192 3\u5272\u8ca0\u62c5\uff1a'+jpy(Math.round(covJ*0.3))+' / 7\u5272\u9084\u4ed8\uff1a'+jpy(refundJ)+'</span>';
+      rowShare.style.display='flex';
+      document.getElementById('r-share').innerHTML=triLine(patShareJ);
+      refInfo.style.display='block';
+      rRefText.innerHTML='\u56fd\u4fdd\u9069\u7528\u5206\u306e\u9084\u4ed8\u4e88\u5b9a\u984d\uff081\u540d\uff09\uff1a<strong>'+jpy(refundJ)+'</strong>（'+cad(refundJ)+' / <span style="color:#3B6D11">'+usd(refundJ)+'</span>）';
+    } else {
+      rowCov.style.display='none';
+      rowShare.style.display='none';
+      refInfo.style.display='block';
+      rRefText.innerHTML='\u9078\u629e\u3055\u308c\u305f\u9805\u76ee\u306f\u5168\u3066\u81ea\u7531\u8a3a\u7642\u306e\u305f\u3081\u3001\u56fd\u4fdd\u9069\u7528\u5916\u3068\u306a\u308a\u307e\u3059\u3002';
+    }
+    if(uncovJ>0){
+      rowNoCov.style.display='flex';
+      document.getElementById('r-nocover').innerHTML=triLine(uncovJ);
+    } else {
+      rowNoCov.style.display='none';
+    }
+  } else {
+    rowCov.style.display='none';
+    rowNoCov.style.display='none';
+    rowShare.style.display='none';
+    refInfo.style.display='none';
+  }
+
+  // オプション
+  if(mode==='dock'){
+    document.getElementById('r-opt-lbl').textContent='\u691c\u67fb\u30aa\u30d7\u30b7\u30e7\u30f3\u8ffd\u52a0';
+    document.getElementById('ro').innerHTML=optMedJ>0?triLine(optMedJ):'\u2014';
+  } else {
+    document.getElementById('r-opt-lbl').textContent='\u9078\u629e\u6cbb\u7642\u6570\uff1a'+st.length+'\u9805\u76ee';
+    document.getElementById('ro').textContent='\u2014';
+  }
+
+  document.getElementById('rono').innerHTML=cadUsd(of2)+' ('+Math.round(or2*100)+'%)';
+  document.getElementById('rca').innerHTML=cadUsd(cf)+' ('+Math.round(cr2*100)+'%)';
+  document.getElementById('rtv').innerHTML=cadUsd(tc2*mt);
+  document.getElementById('rres').innerHTML=cadUsd(200*mt);
+  document.getElementById('rt1').innerHTML=bigCAD(tot);
+
+  var mr=document.getElementById('rtmr');
+  if(px>1){
+    mr.style.display='flex';
+    document.getElementById('rtml').textContent='\u30a8\u30b9\u30af\u30ed\u30fc\u5408\u8a08\uff08'+(px*mt)+'\u540d\uff09';
+    document.getElementById('rtm').innerHTML=bigCAD(tot*px);
+  } else { mr.style.display='none'; }
+
+  document.getElementById('rcp').innerHTML=cadUsdInline((cf+tp)*mt*px);
+  document.getElementById('rop').innerHTML=cadUsdInline(of2*mt*px);
+
+  var showWarn=false;
+  if(mode==='treat'){for(var i=0;i<st.length;i++){var t=gt(st[i]);if(t&&t.warn){showWarn=true;break;}}}
+  document.getElementById('treat-warn').style.display=showWarn?'block':'none';
+}
+
+window.onload=function(){drawC();drawO();drawT();calc();};
+</script>
+</body>
+</html>
